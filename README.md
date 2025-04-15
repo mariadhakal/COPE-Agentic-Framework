@@ -1,5 +1,5 @@
-# COBA-Agentic-Framework
-a framework to analyze the bottleneck for code optimization
+# COPE-Agentic-Framework
+Code Performance Evaluation agentic framework, a framework to analyze the bottleneck for code optimization
 
 
 # Profiling Tools for Java and Python
