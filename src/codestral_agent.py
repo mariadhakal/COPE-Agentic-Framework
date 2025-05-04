@@ -3,64 +3,25 @@ import json
 from mistralai import Mistral, AssistantMessage, ToolMessage, UserMessage, SystemMessage
 from mistralai.models.function import Function
 
+from typing import TypedDict, List, Dict, Any, Optional
+from langgraph.graph import StateGraph, END
+from langchain_core.messages import HumanMessage, AIMessage
+
 token = os.environ["GITHUB_TOKEN"]
 endpoint = "https://models.inference.ai.azure.com"
 model_name = "Codestral-2501"
 
-
-# Define a function that returns flight
-# information between two cities (mock implementation)
-def get_flight_info(origin_city: str, destination_city: str):
-    if origin_city == "Seattle" and destination_city == "Miami":
-        return json.dumps({
-            "airline": "Delta",
-            "flight_number": "DL123",
-            "flight_date": "May 7th, 2024",
-            "flight_time": "10:00AM"})
-    return json.dumps({"error": "No flights found between the cities"})
-
-
-# Define a function tool that the model
-# can ask to invoke in order to retrieve flight information
-tool = {
-    "type": "function",
-    "function": Function(
-        name="get_flight_info",
-        description="""Returns information about the next flight
-            between two cities.
-            This includes the name of the airline,
-            flight number and the date and time
-            of the next flight""",
-        parameters={
-            "type": "object",
-            "properties": {
-                "origin_city": {
-                    "type": "string",
-                    "description": ("The name of the city"
-                                    " where the flight originates"),
-                },
-                "destination_city": {
-                    "type": "string",
-                    "description": "The flight destination city",
-                },
-            },
-            "required": [
-                "origin_city",
-                "destination_city"
-            ],
-        }
-    )
-}
-
-
 client = Mistral(api_key=token, server_url=endpoint)
+
+user_message = """
+    Evaluate the performance of ths java code......
+"""
 
 messages = [
     SystemMessage(
-        content="You are an assistant that helps users find flight information."),
+        content="You are an assistant that helps users to evaluate the performance of java code."),
     UserMessage(
-        content=("I'm interested in going to Miami. What is "
-                 "the next flight there from Seattle?")),
+        content=f"{user_message}"),
 ]
 
 response = client.chat.complete(
