@@ -14,7 +14,7 @@ A tool that compiles, runs, and profiles Java code using JFR.
 A script to analyze multiple code samples from a CSV file.
 
 ## Dataset
-https://www.cs.utexas.edu/~scottm/cs307/
+[https://www.cs.utexas.edu/~scottm/cs307/](https://www.cs.utexas.edu/~scottm/cs307/codingSamples.htm]
 ## Usage
 ### Single Code Analysis
 To analyze a single Java code sample:
