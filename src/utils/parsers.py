@@ -24,19 +24,42 @@
 
 import javalang
 
-source_code = """public int setSecurityMode ( int level, String authToken ) throws RemoteException {
-if(!this.authToken.equals( authToken )){
-throw new RemoteException( "Invalid Login Token" );
+# source_code = """public class Wrapper {public int setSecurityMode(int level, String authToken) throws RemoteException {
+#         if (!this.authToken.equals(authToken)) {
+#             throw new RemoteException("Invalid Login Token");
+#         }
+#         ServerSettingBean.setSecureMode("" + level);
+#         serverSettingBean.updateSettings();
+#         securityMode = level;
+#         return securityMode;
+#     }}"""
+source_code = """
+public class HelloWorld{
+	public static void main(String[] args) {
+		System.out.println("Hello World!");
+	}
 }
-ServerSettingBean.setSecureMode(""+level);
-serverSettingBean.updateSettings();
-securityMode = level;
-return securityMode;
-}"""
+"""
+
+
+def print_ast(node, indent=0):
+    # Print the node type and, if available, its name
+    node_type = type(node).__name__
+    name = getattr(node, 'name', None)
+    print('  ' * indent + f'{node_type}' + (f': {name}' if name else ''))
+    # Recursively print children
+    if hasattr(node, 'children'):
+        for child in node.children:
+            if isinstance(child, list):
+                for item in child:
+                    if isinstance(item, javalang.ast.Node):
+                        print_ast(item, indent + 1)
+            elif isinstance(child, javalang.ast.Node):
+                print_ast(child, indent + 1)
+
+
 try:
     tree = javalang.parse.parse(source_code)
-    print(tree.package.name)  # 'example'
-    for type_decl in tree.types:
-        print(type_decl.name)  # 'Test'
+    print_ast(tree)
 except javalang.parser.JavaSyntaxError as e:
-    print("Syntax error:",e)
+    print("Syntax error:", e)

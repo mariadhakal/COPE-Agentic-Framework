@@ -1,5 +1,6 @@
 # Dependency directory
 dataset/
-
+jfr_profiles/
 # Files
 *.tar.gz
+*.csv
