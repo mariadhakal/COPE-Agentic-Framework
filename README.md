@@ -10,22 +10,12 @@ The system consists of three main components:
 The core bottleneck diagnosis agent that uses Mistral AI to analyze Java code.
 ### 2. Java Profiler (java_profiler.py)
 A tool that compiles, runs, and profiles Java code using JFR.
-### 3. Parser
-
-We use javalang to parse java code. It is a python based java parser which makes it easier to use.
-
-       pip install javalang
-https://www.baeldung.com/javaparser
-https://javaparser.org/
-
-Python http://github.com/dabeaz/ply
-
-Python: ast tree library: https://docs.python.org/3/library/ast.html
-### Batch Analyzer (batch_analyzer.py) 
-A script to analyze multiple code samples from a CSV file.
+### 3. Parser (java_code_parser.py)
+A tool that parses java code and return the ast is dict format.
 
 ## Dataset
-[https://www.cs.utexas.edu/~scottm/cs307/](https://www.cs.utexas.edu/~scottm/cs307/codingSamples.htm]
+https://www.cs.utexas.edu/~scottm/cs307/](https://www.cs.utexas.edu/~scottm/cs307/codingSamples.htm
+
 ## Usage
 ### Single Code Analysis
 To analyze a single Java code sample:
@@ -35,38 +25,13 @@ Or from a file:
 > python agent.py --file path/to/MyClass.java
  
 ## Batch Analysis
-To analyze multiple code samples from a CSV file:
+A script to analyze multiple code samples from a CSV file.
 > python batch_analyzer.py samples.csv --output-dir results
  
 The CSV file format:
 > id,class_name,description,code
 sample1,MyClass1,"Description","public class MyClass1 { ... }"
 sample2,MyClass2,"Description","public class MyClass2 { ... }"
-
-## Profiling Tools for Java and Python
-java_profiler.py -> JFR \
-This script will:
-- Take Java code as input
-- Save it to a file
-- Compile it
-- Run it with JFR enabled
-- Generate a basic analysis of the JFR recording
-
-To use the script independently:
-* Method 1: Provide code directly:
-> python java_profiler.py --code "public class HelloWorld { public static void main(String[] args) { System.out.println(\"Hello World!\"); } }" --class-name HelloWorld --duration 5
-* Method 2: From a Java file:
-> python java_profiler.py --file HelloWorld.java --class-name HelloWorld --duration 5
-* Method 3: With automatic JMC opening:
-> python java_profiler.py --file HelloWorld.java --class-name HelloWorld --open-jmc
-
-### Note:
-The script requires Python 3.6+ and a JDK 11+ installation with JFR tools in your PATH \
-For complex Java applications, you might need to adjust the classpath and JVM arguments \
-The basic metrics extraction provides a simple overview - for detailed analysis, use the JMC GUI that can be launched with the --open-jmc flag
-
-
-https://www.ej-technologies.com/jprofiler
 
 ## LLM Agent
 We are using codestral as our llm agent, from github models
@@ -86,4 +51,37 @@ We are using codestral as our llm agent, from github models
 
    Install Mistral SDK using pip (Requires: Python >=3.9):
 
-       pip install mistralai>=1.0.0
+ ## Parser
+
+We use javalang to parse java code. It is a python based java parser which makes it easier to use.
+
+       pip install javalang
+       
+### Other parsers that 
+https://www.baeldung.com/javaparser
+https://javaparser.org/
+Python http://github.com/dabeaz/ply
+Python: ast tree library: https://docs.python.org/3/library/ast.html
+ 
+
+## Profiling Tools 
+java_profiler.py -> JFR \
+This script will:
+- Take Java code as input
+- Save it to a file
+- Compile it
+- Run it with JFR enabled
+- Generate a basic analysis of the JFR recording
+
+To use the script independently:
+* Method 1: Provide code directly:
+> python java_profiler.py --code "public class HelloWorld { public static void main(String[] args) { System.out.println(\"Hello World!\"); } }" --class-name HelloWorld --duration 5
+* Method 2: From a Java file:
+> python java_profiler.py --file HelloWorld.java --class-name HelloWorld --duration 5
+
+### Note:
+The requires Python 3.6+ and a JDK 11+ installation with JFR tools in your PATH \
+For complex Java applications, you might need to adjust the classpath and JVM arguments \
+The basic metrics extraction provides a simple overview - for detailed analysis
+
+     pip install mistralai>=1.0.0
