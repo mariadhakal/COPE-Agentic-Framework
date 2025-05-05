@@ -129,7 +129,8 @@ class JavaProfiler:
                 "metadata": metadata_process.stdout,
                 "cpu": self._extract_cpu_metrics(jfr_file),
                 "memory": self._extract_memory_metrics(jfr_file),
-                "file_size_bytes": os.path.getsize(jfr_file)
+                "file_size_bytes": os.path.getsize(jfr_file),
+                "hot_methods": self._extract_hot_methods(jfr_file)
             }
 
             return metrics
@@ -139,6 +140,36 @@ class JavaProfiler:
                 "error": "Failed to analyze JFR file",
                 "details": e.stderr
             }
+
+    def _extract_hot_methods(self, jfr_file, top_n=5):
+        """
+        Use jfr to print execution samples, count by method,
+        and return the top_n method names.
+        """
+
+        try:
+            # dump all ExecutionSample events
+            cmd = ["jfr", "print",
+                   "--events", "jdk.ExecutionSample",
+                   "--stackdepth", "1",  # only top frame
+                  jfr_file]
+            proc = subprocess.run(
+                    cmd, check=True, capture_output=True, text=True
+            )
+            # each line: "timestamp; thread; methodSignature"
+            counts = {}
+
+            for line in proc.stdout.splitlines():
+                parts = line.split(";")
+
+                if len(parts) >= 3:
+                    method = parts[2].strip()
+                    counts[method] = counts.get(method, 0) + 1
+            # pick top N
+            hot = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
+            return [m for m, _ in hot]
+        except subprocess.CalledProcessError:
+            return []
 
     def _extract_cpu_metrics(self, jfr_file):
         """Extract CPU metrics from JFR file."""
