@@ -3,6 +3,8 @@ import json
 from mistralai import Mistral, AssistantMessage, ToolMessage, UserMessage, SystemMessage
 from mistralai.models.function import Function
 import re
+from java_code_parser import java_parser
+import javalang
 
 token = os.environ["GITHUB_TOKEN"]
 endpoint = "https://models.inference.ai.azure.com"
@@ -11,26 +13,6 @@ model_name = "Codestral-2501"
 # Initialize model
 client = Mistral(api_key=token, server_url=endpoint)
 
-# Write the prompt
-user_message = """
-    Evaluate the performance of this java code:
-"""
-
-messages = [
-    SystemMessage(
-        content="You are an assistant that helps users to evaluate the performance of java code."),
-    UserMessage(
-        content=f"{user_message}"),
-]
-
-# Call the llm
-response = client.chat.complete(
-    messages=[{"role": "user", "content": "Hello world"}],
-    model=model_name,
-)
-
-
-# print(response.choices[0].message.content)
 
 class Agent:
     def __init__(self, system=""):
@@ -55,70 +37,107 @@ class Agent:
 
 
 prompt = """
+    You're a Java code parsing assistant. Your task is to analyze Java code provided by users.
+
     You run in a loop of Thought, Action, PAUSE, Observation.
     At the end of the loop you output an Answer
-    Use Thought to describe your thoughts about the question you have been asked.
-    Use Action to run one of the actions available to you - then return PAUSE.
-    Observation will be the result of running those actions.
     
-    Your available actions are:
-    java_code_parser:
-    e.g. java_code_parser: 4 * 7 / 3
-    Runs a java parser and returns the abstract syntax tree - uses javalang to parse the code so be sure the code being entered is in java language
+    Use Thought to describe why you’re doing what you’re doing.
+    Use Action to invoke one of your tools, then return PAUSE.
+    Observation will be filled in with the result of that action.
     
-    dynamic_profiling:
-    e.g. dynamic_profiling: jvm
-    returns execution time of the java code
-    
-    Example session:
-    
-    Question: How much does a Bulldog weigh?
-    Thought: I should look the dogs weight using average_dog_weight
-    Action: average_dog_weight: Bulldog
-    PAUSE
-    
-    You will be called again with this:
-    
-    Observation: A Bulldog weights 51 lbs
-    
-    You then output:
-    
-    Answer: A bulldog weights 51 lbs
+    Your available tools are: 
+    • java_code_parser:  
+        - Input: a Java code snippet (method or class)
+        - Behavior: parses the Java code and produces an abstract syntax tree (AST)
+        - Example:  
+            Action: java_code_parser: public class Operations{public int fib(int n) { return n < 2 ? n : fib(n-1)+fib(n-2); }}
+
+When given Java code:
+1. First, check if the code appears to be valid Java syntax (proper brackets, semicolons, etc.)
+2. Assess if the code is a complete method, class, or if it needs to be wrapped
+3. Use the java_code_parser tool to try parsing the code
+4. Analyze the parser response:
+   - If successful, examine the AST structure
+   - If unsuccessful, identify why the parsing failed and suggest corrections
+5. Provide feedback on whether the code is in an acceptable format for javalang parser
+6. Summarize your findings in the final Answer
+
+Example session:
+
+Question: Parse this Java code:
+public int calculate(int x, int y) {
+    return x + y;
+}
+
+Thought: I need to analyze this Java method that calculates the sum of two integers. I'll use the java_code_parser 
+tool to get the AST.
+
+Action: java_code_parser: public int calculate(int x, int y) { return x + y; }
+
+PAUSE
+
+Observation: {"methodName": "calculate", "returnType": "int", "parameters": [{"type": "int", "name": "x"}, 
+{"type": "int", "name": "y"}], "body": {"type": "ReturnStatement", "expression": {"type": "BinaryOperation", 
+"operator": "+", "leftOperand": "x", "rightOperand": "y"}}}
+
+Thought: Now I can analyze the AST. This is a simple method that takes two integer parameters and returns their sum.
+
+Answer: The code defines a method named 'calculate' that:
+- Takes two integer parameters: x and y
+- Returns an integer value
+- Has a simple implementation that adds x and y and returns the result
+- Has a time complexity of O(1) and space complexity of O(1)
+
 """.strip()
 
-def java_code_parser(what):
-    return eval(what)
 
-def dynamic_profiling(name):
-    if name in "Scottish Terrier":
-        return("Scottish Terriers average 20 lbs")
-    elif name in "Border Collie":
-        return("a Border Collies average weight is 37 lbs")
-    elif name in "Toy Poodle":
-        return("a toy poodles average weight is 7 lbs")
-    else:
-        return("An average dog weights 50 lbs")
+def java_code_parser(snippet):
+    """
+    Wrapper function that calls the parse_java_code function from the imported module.
+    This function will attempt to parse the Java code and return the AST.
+    If parsing fails, it returns an error message.
+    """
+    is_full_cu = (
+            snippet.lstrip().startswith(("package", "public class", "class"))
+            or "interface" in snippet
+            or "enum" in snippet
+    )
+    code = snippet if is_full_cu else f"class _Wrapper {{ {snippet} }}"
+    try:
+        # Call the parse_java_code function from your module
+        return java_parser(code)
+    except Exception as e:
+        return f"Error parsing code: {str(e)}"
+
 
 known_actions = {
     "java_code_parser": java_code_parser,
-    "dynamic_profiling": dynamic_profiling
 }
 
 # Creating a loop for tool calling agent
-action_re = re.compile('^Action: (\w+): (.*)$')   # python regular expression to selection action
+action_re = re.compile(r'^\s*Action:\s*(\w+)\s*:\s*(.*)$')  # python regular expression to selection action
 
-def query(question, max_turns=5):
-    i = 0 # counter to keep track of iterations
-    bot = Agent(prompt) # initialize agent with default system prompt
-    next_prompt = question
+
+def query(code, max_turns=5):
+    i = 0  # counter to keep track of iterations
+    bot = Agent(prompt)  # initialize agent with default system prompt
+    next_prompt = f"Parse and analyze this Java code:\n{code}\n"
+
     while i < max_turns:
         i += 1
         result = bot(next_prompt)
         print(result)
+
+        # actions = [
+        #     action_re.match(a)
+        #     for a in result.split("\n")  # parse the content of the result
+        #     if action_re.match(a)
+        # ]
         actions = [
-            action_re.match(a)
-            for a in result.split("\n") # parse the content of the result
-            if action_re.match(a)
+            action_re.match(line.strip())
+            for line in result.splitlines()
+            if action_re.match(line.strip())
         ]
 
         if actions:
@@ -136,6 +155,18 @@ def query(question, max_turns=5):
 
 # Calling an agent
 
-question = """I have 2 dogs, a border collie and a scottish terrier. \
-What is their combined weight"""
-query(question)
+if __name__ == "__main__":
+    sample_code = """
+    public int setSecurityMode ( int level, String authToken ) throws RemoteException {
+    if ( !this.authToken.equals( authToken )){
+        throw new RemoteException( "Invalid Login Token" );
+    }
+    ServerSettingBean.setSecureMode( "" + level );
+    serverSettingBean.updateSettings();
+    securityMode = level;
+    return securityMode;
+}
+    """
+
+    query(sample_code)
+    # print(analysis)
