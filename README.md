@@ -10,7 +10,18 @@ The system consists of three main components:
 The core bottleneck diagnosis agent that uses Mistral AI to analyze Java code.
 ### 2. Java Profiler (java_profiler.py)
 A tool that compiles, runs, and profiles Java code using JFR.
-### 3. Batch Analyzer (batch_analyzer.py) 
+### 3. Parser
+
+We use javalang to parse java code. It is a python based java parser which makes it easier to use.
+
+       pip install javalang
+https://www.baeldung.com/javaparser
+https://javaparser.org/
+
+Python http://github.com/dabeaz/ply
+
+Python: ast tree library: https://docs.python.org/3/library/ast.html
+### Batch Analyzer (batch_analyzer.py) 
 A script to analyze multiple code samples from a CSV file.
 
 ## Dataset
@@ -56,18 +67,6 @@ The basic metrics extraction provides a simple overview - for detailed analysis,
 
 
 https://www.ej-technologies.com/jprofiler
-
-## Parser
-
-We use javalang to parse java code. It is a python based java parser which makes it easier to use.
-
-       pip install javalang
-https://www.baeldung.com/javaparser
-https://javaparser.org/
-
-Python http://github.com/dabeaz/ply
-
-Python: ast tree library: https://docs.python.org/3/library/ast.html
 
 ## LLM Agent
 We are using codestral as our llm agent, from github models
