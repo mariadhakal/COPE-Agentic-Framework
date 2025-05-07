@@ -11,7 +11,7 @@ import random
 def usage(status=0):
     print(f'''Usage: Run your executable -[flags + arguments] ELF_file [program arguments]"
 
-  	 For example: python3 ./copetest.py -s setting-2 blocking 15
+  	 For example: python3 ./copetest.py -a x86 -s setting-2,setting-1 blocking 15
 
 	 If you have a program and you would like it to be compiled here, use the -c flag and pass in the program file.
 	 For example: python3 ./copetest.py -s setting-2 -c C++ blocking.cc 15
@@ -21,7 +21,7 @@ def usage(status=0):
     -a      ARCHITECTURE    Architecture setting: x86, arm, cuda
     -c      COMPILE         Compile to ELF from a language other than C. Only supported language: C, C++ or Cpp, java
     -p      PATH            Path to m2s command
-    -s      SETTING         Name of setting directory
+    -s      SETTING         Name of setting(s) directory, comma delimited & no spaces
     
 	 Even with the compile flag, an executable or file name must be provided, and it must match the name of the executable the compiler builds''')
     sys.exit(status)
@@ -82,11 +82,12 @@ def main():
     # flags: 
     # default values
     compile_flag = False
+    setting_flag=False
     executable = None
     filename = None
     cmpcmd = None
-    sett = 'setting-1'
-    arch = 'x86'
+    setts = ['setting-1']
+    arch = 'x'
     path = 'm2s'
     output = 'm2sim_output'
 
@@ -106,7 +107,9 @@ def main():
             path = arguments.pop(0) # shift
     
         elif argument == '-s':
-            sett = arguments.pop(0) # shift
+            setting_flag = True
+            setts = arguments.pop(0) # shift
+            setts = sett.split(',')
     
         elif argument == '-h':
             usage(0)
@@ -121,39 +124,41 @@ def main():
     else:
         executable = filename
 
-    # program running different settings too?, give filename id #
+    # Possible Addtional, running multiple settings and compare: program running different settings too?, give filename id #
 
     # call m2sim < executable
     # run all three architectures
     if arch == '':
         archs = ['x86', 'arm']
         for i,a in enumerate(archs):
-            arch = a
-            of = f"{sett}/{output}_{a}.output"
+            for sett in setts:
+                arch = a
+                of = f"{sett}/{output}_{a}.output"
+                m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out.txt {executable} {' '.join(arguments)} 2> {of}"
+                print(m2scmd)
+                os.system(m2scmd)
+
+                # Parse statistics summaryfiles
+                parse_stats(sett,of,arch)
+
+                # add config ot stats summary
+                config_outputfile(sett,of,arch)
+
+    else: # run 1 specified architecture
+        for sett in setts:
+            print(arguments) 
+            of = f"{sett}/{output}_{arch}.output"
             m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out.txt {executable} {' '.join(arguments)} 2> {of}"
             print(m2scmd)
             os.system(m2scmd)
 
-            # Parse statistics summaryfiles
+            print("\nParse stats", of)
+            # Parse statistics summary file
             parse_stats(sett,of,arch)
 
-            # add config ot stats summary
+            print("Config files", of)
+            # Add config to stats summary
             config_outputfile(sett,of,arch)
-
-    else: # run 1 specified architecture
-        print(arguments) 
-        of = f"{sett}/{output}_{arch}.output"
-        m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out.txt {executable} {' '.join(arguments)} 2> {of}"
-        print(m2scmd)
-        os.system(m2scmd)
-
-        print("\nParse stats", of)
-        # Parse statistics summary file
-        parse_stats(sett,of,arch)
-
-        print("Config files", of)
-        # Add config to stats summary
-        config_outputfile(sett,of,arch)
 
     return
 
