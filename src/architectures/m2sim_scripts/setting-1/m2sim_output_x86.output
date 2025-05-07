@@ -1,0 +1,84 @@
+Simulation Statistics Summary
+[ General ]
+RealTime = 15.12 [s]
+SimEnd = ContextsFinished
+SimTime = 1137889.00 [ns]
+Frequency = 1000 [MHz]
+Cycles = 1137890
+
+[ x86 ]
+RealTime = 15.03 [s]
+Instructions = 176671
+InstructionsPerSecond = 11756
+SimTime = 1137890.00 [ns]
+Frequency = 1000 [MHz]
+Cycles = 1137890
+CyclesPerSecond = 75714
+FastForwardInstructions = 0
+CommittedInstructions = 93679
+CommittedInstructionsPerCycle = 0.08233
+CommittedMicroInstructions = 160696
+CommittedMicroInstructionsPerCycle = 0.1412
+BranchPredictionAccuracy = 0.8316
+
+Architecture Configuration:
+[ General ]
+Cores = 2
+Threads = 1
+Memory Configuration:
+[CacheGeometry geo-l1]
+Sets = 256
+Assoc = 2
+BlockSize = 8
+Latency = 2
+Policy = LRU
+Ports = 2
+
+[Module mod-l1-0-inst]
+Type = Cache
+Geometry = geo-l1
+LowNetwork = net-l1-mm 
+LowModules = mod-mm
+
+[Module mod-l1-0-data]
+Type = Cache
+Geometry = geo-l1
+LowNetwork = net-l1-mm 
+LowModules = mod-mm
+
+[Module mod-l1-1-inst]
+Type = Cache
+Geometry = geo-l1
+LowNetwork = net-l1-mm 
+LowModules = mod-mm
+
+[Module mod-l1-1-data]
+Type = Cache
+Geometry = geo-l1
+LowNetwork = net-l1-mm 
+LowModules = mod-mm
+
+[Module mod-mm]
+Type = MainMemory
+BlockSize = 512
+Latency = 200
+HighNetwork = net-l1-mm
+
+[Network net-l1-mm]
+DefaultInputBufferSize = 1024 
+DefaultOutputBufferSize = 1024
+DefaultBandwidth = 256 
+
+[Entry core-0]
+Arch = x86
+Core = 0
+Thread = 0
+DataModule = mod-l1-0-data
+InstModule = mod-l1-0-inst
+
+[Entry core-1]
+Arch = x86
+Core = 1
+Thread = 0
+DataModule = mod-l1-1-data
+InstModule = mod-l1-1-inst
