@@ -5,12 +5,17 @@ Usage: Run your executable -[flags + arguments] ELF_file [program arguments]"
 For example: python3 ./copetest.py -s setting-2 blocking 15
 
 If you have a program and you would like it to be compiled here, use the -c flag and pass in the program file.
+
 For example: python3 ./copetest.py -s setting-2 -c C++ blocking.cc 15
 
 Flags:
+
     -a      ARCHITECTURE    Architecture setting: x86, arm, cuda
+
     -c      COMPILE         Compile to ELF from a specifed language. Only supported languages: C, C++ or Cpp, java (not yet)
+
     -p      PATH            Path to m2s command
+
     -s      SETTING         Name of the configuation setting directory
     
 Even with the compile flag, an executable or file name must be provided, and it must match the name of the executable the compiler builds
