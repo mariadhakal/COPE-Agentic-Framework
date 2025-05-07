@@ -56,7 +56,7 @@ def config_outputfile(sett, output, arch):
         fp.write("Architecture Configuration:\n") 
         for al in arch_lines:
             fp.write(al)
-        fp.write("Memory Configuration:\n")
+        fp.write("\nMemory Configuration:\n")
         for ml in mem_lines:
             fp.write(ml)
     return
