@@ -1,9 +1,3 @@
-Architecture Configuration:
-[ General ]
-Cores = 2
-Threads = 1
-
-Memory Configuration:
 [CacheGeometry geo-l1]
 Sets = 256
 Assoc = 2

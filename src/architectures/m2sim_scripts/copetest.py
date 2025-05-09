@@ -18,7 +18,7 @@ def usage(status=0):
 
 	 {os.path.basename(sys.argv[0])} Flags:
 
-    -a      ARCHITECTURE    Architecture setting: x86, arm, cuda
+    -a      ARCHITECTURE    Architecture setting: x86, si, kpl
     -c      COMPILE         Compile to ELF from a language other than C. Only supported language: C, C++ or Cpp, java
     -p      PATH            Path to m2s command
     -s      SETTING         Name of setting(s) directory, comma delimited & no spaces
@@ -44,7 +44,7 @@ def parse_stats(sett, output, arch):
 def config_outputfile(sett, output, arch):
 
     # parse mem-config
-    with open(f"{sett}/mem-config", 'r') as fp:
+    with open(f"{sett}/mem{arch}-config", 'r') as fp:
         mem_lines = fp.readlines()
 
     # parse arch-config
@@ -83,11 +83,12 @@ def main():
     # default values
     compile_flag = False
     setting_flag=False
+    arch_flag = False
     executable = None
     filename = None
     cmpcmd = None
     setts = ['setting-1']
-    arch = 'x'
+    arch = ''
     path = 'm2s'
     output = 'm2sim_output'
 
@@ -97,6 +98,7 @@ def main():
         argument = arguments.pop(0) # detect flag and pop -
 
         if argument == '-a':
+            arch_flag = True 
             arch = arguments.pop(0) # shift
 
         elif argument == '-c':
@@ -109,7 +111,7 @@ def main():
         elif argument == '-s':
             setting_flag = True
             setts = arguments.pop(0) # shift
-            setts = sett.split(',')
+            setts = setts.split(',')
     
         elif argument == '-h':
             usage(0)
@@ -128,13 +130,17 @@ def main():
 
     # call m2sim < executable
     # run all three architectures
-    if arch == '':
-        archs = ['x86', 'arm']
+    if not arch_flag:
+        archs = ['x86', 'si', 'kpl']
         for i,a in enumerate(archs):
             for sett in setts:
                 arch = a
+                print(arch)
                 of = f"{sett}/{output}_{a}.output"
-                m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out.txt {executable} {' '.join(arguments)} 2> {of}"
+                if arch != 'kpl':
+                    m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem{arch}-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out_{arch}.txt {executable} {' '.join(arguments)} 2> {of}"
+                else:
+                    m2scmd = f"{path} --{arch}-sim detailed --mem-config {sett}/mem{arch}-config --mem-report {sett}/mem-out_{arch}.txt {executable} {' '.join(arguments)} 2> {of}"
                 print(m2scmd)
                 os.system(m2scmd)
 
@@ -148,7 +154,7 @@ def main():
         for sett in setts:
             print(arguments) 
             of = f"{sett}/{output}_{arch}.output"
-            m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem-out.txt {executable} {' '.join(arguments)} 2> {of}"
+            m2scmd = f"{path} --{arch}-sim detailed --{arch}-config {sett}/{arch}-config --mem-config {sett}/mem{arch}-config --{arch}-report {sett}/{arch}-out.txt --mem-report {sett}/mem{arch}-out.txt {executable} {' '.join(arguments)} 2> {of}"
             print(m2scmd)
             os.system(m2scmd)
 
@@ -164,3 +170,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,34 +1,12 @@
-Simulation Statistics Summary
-[ General ]
-RealTime = 1077.06 [s]
-SimEnd = ContextsFinished
-SimTime = 61272680.00 [ns]
-Frequency = 1000 [MHz]
-Cycles = 61272681
-
-[ x86 ]
-RealTime = 1056.70 [s]
-Instructions = 29542044
-InstructionsPerSecond = 27957
-SimTime = 61272681.00 [ns]
-Frequency = 1000 [MHz]
-Cycles = 61272681
-CyclesPerSecond = 57985
-FastForwardInstructions = 0
-CommittedInstructions = 19491277
-CommittedInstructionsPerCycle = 0.3181
-CommittedMicroInstructions = 36105448
-CommittedMicroInstructionsPerCycle = 0.5893
-BranchPredictionAccuracy = 0.8089
-
 Architecture Configuration:
 [ General ]
 Cores = 2
 Threads = 1
+
 Memory Configuration:
 [CacheGeometry geo-l1]
-Sets = 128
-Assoc = 4
+Sets = 256
+Assoc = 2
 BlockSize = 8
 Latency = 2
 Policy = LRU
