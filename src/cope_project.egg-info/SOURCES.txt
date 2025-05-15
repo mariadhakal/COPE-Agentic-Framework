@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+src/codestral_agent.py
+src/agent/agent.py
+src/agent/java_code_parser.py
+src/agent/java_profiler.py
+src/architectures/architecture_registry.py
+src/architectures/arm64.py
+src/architectures/cuda.py
+src/architectures/x86_64.py
+src/architectures/m2sim_scripts/copetest.py
+src/cope_project.egg-info/PKG-INFO
+src/cope_project.egg-info/SOURCES.txt
+src/cope_project.egg-info/dependency_links.txt
+src/cope_project.egg-info/requires.txt
+src/cope_project.egg-info/top_level.txt
+src/utils/parsers.py
