@@ -1,6 +1,62 @@
 # Dependency directory
 dataset/
 jfr_profiles/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment files (NEVER commit these!)
+.env
+*.env
+.env.local
+.env.production
+.env.staging
+src/agent/.env
+agent/.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
 # Files
 *.tar.gz
 *.csv
+
+# Node modules (if any)
+node_modules/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Model files (if large)
+*.model
+*.pkl
+*.joblib
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
